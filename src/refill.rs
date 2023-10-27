@@ -62,8 +62,10 @@ use crate::{fill, LineEnding, Options};
 pub fn unfill(text: &str) -> (String, Options<'_>) {
     let prefix_chars: &[_] = &[' ', '-', '+', '*', '>', '#', '/'];
 
+    let mut line_count = 0;
     let mut options = Options::new(0);
     for (idx, line) in text.lines().enumerate() {
+        line_count += 1;
         options.width = std::cmp::max(options.width, display_width(line));
         let without_prefix = line.trim_start_matches(prefix_chars);
         let prefix = &line[..line.len() - without_prefix.len()];
@@ -83,6 +85,9 @@ pub fn unfill(text: &str) -> (String, Options<'_>) {
                 options.subsequent_indent = prefix;
             }
         }
+    }
+    if line_count == 1 {
+        options.subsequent_indent = options.initial_indent;
     }
 
     let mut unfilled = String::with_capacity(text.len());
@@ -348,5 +353,23 @@ mod tests {
     #[test]
     fn refill_defaults_to_lf() {
         assert_eq!(refill("foo bar baz", 5), "foo\nbar\nbaz");
+    }
+
+    #[test]
+    fn refill_single_line_rust_comment() {
+        assert_eq!(
+            refill(
+                "// This is a rust comment to be refilled onto multiple lines",
+                40
+            ),
+            "// This is a rust comment to be refilled\n// onto multiple lines"
+        );
+        assert_eq!(
+            refill(
+                "/// This is a rust comment to be refilled onto multiple lines",
+                40
+            ),
+            "/// This is a rust comment to be\n/// refilled onto multiple lines"
+        );
     }
 }
