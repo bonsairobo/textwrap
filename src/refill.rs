@@ -60,7 +60,7 @@ use crate::{fill, LineEnding, Options};
 /// assert_eq!(options.line_ending, LineEnding::LF);
 /// ```
 pub fn unfill(text: &str) -> (String, Options<'_>) {
-    let prefix_chars: &[_] = &[' ', '-', '+', '*', '>', '#', '/'];
+    let prefix_chars: &[_] = &[' ', '-', '+', '*', '>', '#', '/', '!'];
 
     let mut line_count = 0;
     let mut options = Options::new(0);
@@ -370,6 +370,13 @@ mod tests {
                 40
             ),
             "/// This is a rust comment to be\n/// refilled onto multiple lines"
+        );
+        assert_eq!(
+            refill(
+                "//! This is a rust comment to be refilled onto multiple lines",
+                40
+            ),
+            "//! This is a rust comment to be\n//! refilled onto multiple lines"
         );
     }
 }
