@@ -86,7 +86,7 @@ pub fn unfill(text: &str) -> (String, Options<'_>) {
             }
         }
     }
-    if line_count == 1 {
+    if line_count == 1 && !options.initial_indent.chars().all(|c| c.is_whitespace()) {
         options.subsequent_indent = options.initial_indent;
     }
 
@@ -377,6 +377,14 @@ mod tests {
                 40
             ),
             "//! This is a rust comment to be\n//! refilled onto multiple lines"
+        );
+    }
+
+    #[test]
+    fn initial_indent_is_not_propagated_if_only_whitespace() {
+        assert_eq!(
+            refill("    An English paragraph.", 20),
+            "    An English\nparagraph."
         );
     }
 }
